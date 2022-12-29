@@ -1,2 +1,2 @@
-C++/WinApi practice - keylogger + some extras
+C++/WinApi practice: keylogger + some extras
 (-;
