@@ -1,0 +1,9 @@
+# Ignore local tests
+shit_folder
+
+# Ignore .exe files - this is for learning purposes only,
+# so not posting a working tool, but only code..
+.exe
+
+# Ignore .log files - nobody needs to see what I type (:
+.log
