@@ -1,3 +1,4 @@
+#pragma GCC diagnostic ignored "-Wreturn-type"
 #define UNICODE
 #include <Windows.h>
 #include <cstdio>
