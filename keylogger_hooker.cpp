@@ -342,5 +342,6 @@ int main()
 - add parameterized constructors overloads.
 - protect char[] buffers/make default logic for cases of too long params.
 - add periodic close + reopen of log file to save.
+- rewrite hook setting/unsetting error handling.
 */
 
