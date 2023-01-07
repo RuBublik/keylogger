@@ -7,3 +7,6 @@ shit_folder
 
 # Ignore .log files - nobody needs to see what I type (:
 *.log
+
+# Ignore TODO file
+TODO.txt
