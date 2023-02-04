@@ -186,10 +186,11 @@ private:
 			output << char(key);
 		}
 		// instead of opening and closing file handlers every time, keep file open and flush.
+		output << std::endl;
 		this->output_file << output.str();
 		this->output_file.flush();	// TODO: add periodic close + reopen to save the file.
 
-		std::cout << output.str() << std::endl;
+		std::cout << output.str();
 
 		return 0;
 	}

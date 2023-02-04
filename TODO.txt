@@ -8,10 +8,11 @@ Keylogger
 
 Logger
 - separate logging to a separte 'Logger' class, (Keylogger will have an instance of it as a member)
+	- BUG: output folder needs to be specified with a '/' at the end, or - the filename concats with folder name to: Drive:/.../FoldernameFilename.txt
 	- add periodic close + reopen of log file to save.
 	- protect char[] buffers/make default logic for cases of too long params.
 	- OPTIONAL: implement protection/encryption on logfile?
-
+	
 
 anti tampering? anti debugging?
 
